@@ -23,6 +23,7 @@ int lex();
 #define PREPROCCESS 2
 #define INCLUDE_FILE 3
 #define COMMENT 4
+#define STRING_LIT 5
 #define UNKNOWN 99
 
 /* Token codes */
@@ -138,10 +139,6 @@ int lookup(char ch) {
             addChar();
             nextToken = COLON;
             break;
-        case '\"':
-            addChar();
-            nextToken = QUOTE;
-            break;
         case '%':
             addChar();
             nextToken = MOD_OP;
@@ -198,6 +195,8 @@ void getChar() {
             charClass = INCLUDE_FILE;
         else if (nextChar == '/' && tmp == '/' )
             charClass = COMMENT;
+        else if (nextChar == '\"')
+            charClass = STRING_LIT;
         else if (isalpha(nextChar))
             charClass = LETTER;
         else if (isdigit(nextChar))
@@ -269,6 +268,7 @@ int lex() {
             }
             nextToken = INCLUDE_FILE;
             break;
+        /* comments in the code //hello world */
         case COMMENT: 
             addChar();
             getChar();
@@ -277,6 +277,18 @@ int lex() {
                 getChar();
             }
             nextToken = COMMENT;
+            break;
+        /* string literals */
+        case STRING_LIT:
+            addChar();
+            getChar();
+            while (flag){
+                addChar();
+                if (nextChar == '\"')
+                    flag = false;
+                getChar();
+            }
+            nextToken = STRING_LIT;
             break;
         /* Parentheses and operators */
         case UNKNOWN:
