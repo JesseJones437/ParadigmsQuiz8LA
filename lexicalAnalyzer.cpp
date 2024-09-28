@@ -24,6 +24,7 @@ int lex();
 #define INCLUDE_FILE 3
 #define COMMENT 4
 #define STRING_LIT 5
+#define UNARY_OPS 6
 #define UNKNOWN 99
 
 /* Token codes */
@@ -191,6 +192,8 @@ void getChar() {
         char tmp = getc(in_fp);
         if (nextChar == '#')
             charClass = PREPROCCESS;
+        else if (nextChar == '+' && tmp == '+' || nextChar == '-' && tmp == '-')
+            charClass = UNARY_OPS;
         else if (nextChar == '<' && !isspace(tmp) )
             charClass = INCLUDE_FILE;
         else if (nextChar == '/' && tmp == '/' )
@@ -289,6 +292,14 @@ int lex() {
                 getChar();
             }
             nextToken = STRING_LIT;
+            break;
+        /* unary operators ++ -- */
+        case UNARY_OPS:
+            addChar();
+            getChar();
+            addChar();
+            getChar();
+            nextToken = UNARY_OPS;
             break;
         /* Parentheses and operators */
         case UNKNOWN:
